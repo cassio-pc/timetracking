@@ -48,63 +48,79 @@ export class Timetracking {
 	}
 
 	public stop(taskName: string, status: TaskStatus, timestamp?: string): void {
-		if (!this.tasks || this.tasks.length === 0) {
+		if (!this.hasTasks()) {
 			console.log('There are no tasks added yet.');
 			return;
 		}
 		if (!taskName) {
-			this.tasks.forEach((t, idx = 0) => {
-				if (t.status === TaskStatus.IN_PROGRESS) {
-					let task = this.getTask(t.name);
-					if (task.stop(status)) {
-						this.tasks[idx] = task;
-					}
-				}
-				idx++;
-			});
-		} else {
-			let idx = _.findIndex(this.tasks, ['name', taskName]);
-			if (idx === -1) {
-				console.log('Task %s not found.', taskName);
-				return;
-			}
-			let task = this.getTask(taskName);
-			let dateFormat = this.getConfigDateFormat();
-			let fullDate = moment();
-			timestamp = timestamp || fullDate.format(dateFormat);
-			let isFullDate = timestamp.includes('/');
-			if (isFullDate) {
-				if (!moment(timestamp, dateFormat).isValid()) {
-					console.log('Time it is not in a valid format.');
-					return;
-				}
-			} else {
-				if (!this.timeIsValid(timestamp, ['([0-9]{1,3})\:+([0-5]{1}[0-9]{1})'])) {
-					console.log('Time it is not in a valid format.');
-					return;
-				}
-				fullDate.hour(+timestamp.split(':')[0]);
-				fullDate.minute(+timestamp.split(':')[1]);
-			}
-			let lastTime = _.last(task.log);
-			if (moment(lastTime.start) > fullDate) {
-				console.log('The time entered must be greater than the start time of the task.');
-				return;
-			}
-			if (task.stop(status, fullDate)) {
-				this.tasks[idx] = task;
-			} else {
-				// If the task could not be stopped, quit the command
-				return;
-			}
+			this.stopAllInProgress(status);
+			this.logStopResult(taskName, status);
+			return;
 		}
+		const idx = _.findIndex(this.tasks, ['name', taskName]);
+		if (idx === -1) {
+			console.log('Task %s not found.', taskName);
+			return;
+		}
+		const task = this.getTask(taskName);
+		const fullDate = this.getStopTimestamp(timestamp);
+		if (!fullDate) return;
+
+		const lastTime = _.last(task.log);
+		if (moment(lastTime.start) > fullDate) {
+			console.log('The time entered must be greater than the start time of the task.');
+			return;
+		}
+		if (!task.stop(status, fullDate)) return;
+
+		this.tasks[idx] = task;
 		if (this.updateTasks()) {
-			let msg = status === TaskStatus.FINISHED ? 'completed' : 'paused';
-			if (taskName) {
-				console.log('Task %s has been %s.', taskName, msg);
-			} else {
-				console.log('All tasks in progress have been %s.', msg);
+			this.logStopResult(taskName, status);
+		}
+	}
+
+	private hasTasks(): boolean {
+		return !!(this.tasks && this.tasks.length > 0);
+	}
+
+	private stopAllInProgress(status: TaskStatus): void {
+		this.tasks.forEach((t, idx = 0) => {
+			if (t.status === TaskStatus.IN_PROGRESS) {
+				const task = this.getTask(t.name);
+				if (task.stop(status)) {
+					this.tasks[idx] = task;
+				}
 			}
+			idx++;
+		});
+		this.updateTasks();
+	}
+
+	private getStopTimestamp(timestamp?: string): moment.Moment | null {
+		const dateFormat = this.getConfigDateFormat();
+		const now = moment();
+		const ts = timestamp || now.format(dateFormat);
+		if (ts.includes('/')) {
+			if (!moment(ts, dateFormat).isValid()) {
+				console.log('Time it is not in a valid format.');
+				return null;
+			}
+			return moment(ts, dateFormat);
+		}
+		if (!this.timeIsValid(ts, ['([0-9]{1,3})\:+([0-5]{1}[0-9]{1})'])) {
+			console.log('Time it is not in a valid format.');
+			return null;
+		}
+		const [hour, minute] = ts.split(':').map(Number);
+		return now.clone().hour(hour).minute(minute);
+	}
+
+	private logStopResult(taskName: string, status: TaskStatus): void {
+		const msg = status === TaskStatus.FINISHED ? 'completed' : 'paused';
+		if (taskName) {
+			console.log('Task %s has been %s.', taskName, msg);
+		} else {
+			console.log('All tasks in progress have been %s.', msg);
 		}
 	}
 
