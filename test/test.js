@@ -19,7 +19,7 @@ const timetracking = new time.Timetracking(config);
 
 describe(`${pkg.name} - ${pkg.description}`, () => {
 
-	before(() => {
+	beforeEach(() => {
 		config.set('tasks', []);
 	});
 
