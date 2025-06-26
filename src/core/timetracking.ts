@@ -174,49 +174,76 @@ export class Timetracking {
 	}
 
 	public add(taskName: string, timeSpent: string, date: string) {
-		let dateFormat = this.config && this.config.date_format ? this.config.date_format.toUpperCase() + ' h:mm' : 'MM/DD/YYYY h:mm';
-		if (date === undefined) {
-			date = moment().format(dateFormat);
-		} else {
-			if (!moment(date, dateFormat).isValid()) {
-				console.log('Date it is not in a valid format.');
-				return;
-			}
-		}
+		const dateFormat = this.getDateFormat();
+		date = this.validateAndFormatDate(date, dateFormat);
+		if (!date) return;
+	
 		if (!this.timeIsValid(timeSpent)) {
 			console.log('Time spent it is not in a valid format.');
 			return;
 		}
-		let isFullHour = timeSpent.indexOf(':') > 0;
-		let hour: number;
-		let min: number;
-		if (isFullHour) {
-			let split = timeSpent.split(':');
-			hour = +split[0];
-			min = +split[1];
-		} else {
-			let valueOfSubstr: number = +timeSpent.substring(0, timeSpent.length - 1);
-			hour = timeSpent.indexOf('h') > -1 ? valueOfSubstr : 0;
-			min = timeSpent.indexOf('m') > -1 ? valueOfSubstr : 0;
+	
+		const { hour, min } = this.parseTime(timeSpent);
+		this.processTask(taskName, date, dateFormat, hour, min);
+	}
+	
+	private getDateFormat(): string {
+		return this.config?.date_format 
+			? `${this.config.date_format.toUpperCase()} h:mm` 
+			: 'MM/DD/YYYY h:mm';
+	}
+	
+	private validateAndFormatDate(date: string, dateFormat: string): string | null {
+		if (date === undefined) {
+			return moment().format(dateFormat);
 		}
-		let idx = _.findIndex(this.tasks, ['name', taskName]);
-		let task = this.getTaskByIndex(taskName, idx);
+	
+		if (!moment(date, dateFormat).isValid()) {
+			console.log('Date it is not in a valid format.');
+			return null;
+		}
+		
+		return date;
+	}
+	
+	private parseTime(timeSpent: string): { hour: number, min: number } {
+		if (timeSpent.indexOf(':') > 0) {
+			const [hour, min] = timeSpent.split(':').map(Number);
+			return { hour, min };
+		}
+	
+		const value = +timeSpent.substring(0, timeSpent.length - 1);
+		return {
+			hour: timeSpent.indexOf('h') > -1 ? value : 0,
+			min: timeSpent.indexOf('m') > -1 ? value : 0
+		};
+	}
+	
+	private processTask(taskName: string, date: string, dateFormat: string, hour: number, min: number) {
+		const idx = _.findIndex(this.tasks, ['name', taskName]);
+		const task = this.getTaskByIndex(taskName, idx);
+	
 		if (!task.add(date, dateFormat, hour, min)) {
 			return;
 		}
+	
 		if (idx === -1) {
 			task.setStatus(TaskStatus.FINISHED);
 			this.tasks.push(task);
 		} else {
 			this.tasks[idx] = task;
 		}
+	
 		if (this.updateTasks()) {
-			if (idx === -1) {
-				console.log('Task %s added.', task.name);
-			} else {
-				console.log('The entered time was added in the task %s.', task.name);
-			}
+			this.logTaskUpdate(task, idx);
 		}
+	}
+	
+	private logTaskUpdate(task: Task, index: number) {
+		const message = index === -1
+			? 'Task %s added.'
+			: 'The entered time was added in the task %s.';
+		console.log(message, task.name);
 	}
 
 	private getTask(key: string): Task {
