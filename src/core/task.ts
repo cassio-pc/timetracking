@@ -27,8 +27,6 @@ export class Task {
 	public setDescription(description: string): void {
 		if (description) {
 			this.description = description;
-		} else if (this.description) {
-			this.description = this.description;
 		} else {
 			this.description = '';
 		}
