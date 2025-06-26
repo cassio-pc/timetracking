@@ -113,7 +113,10 @@ export class Timetracking {
 			console.log('There are no tasks added yet.');
 			return;
 		}
-		let dateFormat = this.config && this.config.date_format ? this.config.date_format.toUpperCase() : 'MM/DD/YYYY';
+		let dateFormat = 'MM/DD/YYYY';
+		if (this.config && this.config.date_format) {
+			dateFormat = this.config.date_format.toUpperCase();
+		}
 		if (date === undefined) {
 			date = moment().format(dateFormat);
 		} else {
@@ -158,7 +161,10 @@ export class Timetracking {
 	}
 
 	public add(taskName: string, timeSpent: string, date: string) {
-		let dateFormat = this.config && this.config.date_format ? this.config.date_format.toUpperCase() + ' h:mm' : 'MM/DD/YYYY h:mm';
+		let dateFormat = 'MM/DD/YYYY h:mm';
+		if (this.config && this.config.date_format) {
+			dateFormat = this.config.date_format.toUpperCase() + ' h:mm';
+		}
 		if (date === undefined) {
 			date = moment().format(dateFormat);
 		} else {
@@ -180,8 +186,16 @@ export class Timetracking {
 			min = +split[1];
 		} else {
 			let valueOfSubstr: number = +timeSpent.substring(0, timeSpent.length - 1);
-			hour = timeSpent.indexOf('h') > -1 ? valueOfSubstr : 0;
-			min = timeSpent.indexOf('m') > -1 ? valueOfSubstr : 0;
+			if (timeSpent.indexOf('h') > -1) {
+				hour = valueOfSubstr;
+			} else {
+				hour = 0;
+			}
+			if (timeSpent.indexOf('m') > -1) {
+				min = valueOfSubstr;
+			} else {
+				min = 0;
+			}
 		}
 		let idx = _.findIndex(this.tasks, ['name', taskName]);
 		let task = this.getTaskByIndex(taskName, idx);
@@ -257,6 +271,10 @@ export class Timetracking {
 	}
 
 	private getConfigDateFormat(): string {
-		return this.config && this.config.date_format ? this.config.date_format.toUpperCase() + ' h:mm' : 'MM/DD/YYYY h:mm';
+		if (this.config && this.config.date_format) {
+			return this.config.date_format.toUpperCase() + ' h:mm';
+		} else {
+			return 'MM/DD/YYYY h:mm';
+		}
 	}
 }
