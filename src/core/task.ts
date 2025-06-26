@@ -13,13 +13,25 @@ export class Task {
 
 	constructor(name: string, values: any) {
 		this.name = name;
-		this.description = values ? values.description : '';
-		this.status = values ? values.status : TaskStatus.IN_PROGRESS;
-		this.log = values ? values.log : [];
+		if (values) {
+			this.description = values.description;
+			this.status = values.status;
+			this.log = values.log;
+		} else {
+			this.description = '';
+			this.status = TaskStatus.IN_PROGRESS;
+			this.log = [];
+		}
 	}
 
 	public setDescription(description: string): void {
-		this.description = description ? description : this.description ? this.description : '';
+		if (description) {
+			this.description = description;
+		} else if (this.description) {
+			this.description = this.description;
+		} else {
+			this.description = '';
+		}
 	}
 
 	public setStatus(status: TaskStatus): void {

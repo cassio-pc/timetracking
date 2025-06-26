@@ -35,22 +35,32 @@ describe(`${pkg.name} - ${pkg.description}`, () => {
 	});
 
 	it(':: pause task', () => {
-		let date = new Date();
-		let formattedDate = `${date.getHours()}:${date.getMinutes().toString().length == 1 ? '0' + date.getMinutes(): date.getMinutes()}`;
-		timetracking.stop('new task', taskStatus.TaskStatus.PAUSED, formattedDate);
-		let tasks = config.get('tasks');
-		assert.equal(tasks.length, 1);
-		assert.equal(tasks[0].status, 1)
-	});
+        let date = new Date();
+        let formattedDate;
+        if (date.getMinutes().toString().length == 1) {
+            formattedDate = date.getHours() + ':0' + date.getMinutes();
+        } else {
+            formattedDate = date.getHours() + ':' + date.getMinutes();
+        }
+        timetracking.stop('new task', taskStatus.TaskStatus.PAUSED, formattedDate);
+        let tasks = config.get('tasks');
+        assert.equal(tasks.length, 1);
+        assert.equal(tasks[0].status, 1)
+    });
 
-	it(':: stop task', () => {
-		let date = new Date();
-		let formattedDate = `${date.getHours()}:${date.getMinutes().toString().length == 1 ? '0' + date.getMinutes(): date.getMinutes()}`;
-		timetracking.stop('new task', taskStatus.TaskStatus.FINISHED, formattedDate);
-		let tasks = config.get('tasks');
-		assert.equal(tasks.length, 1);
-		assert.equal(tasks[0].status, 2)		
-	});
+    it(':: stop task', () => {
+        let date = new Date();
+        let formattedDate;
+        if (date.getMinutes().toString().length == 1) {
+            formattedDate = date.getHours() + ':0' + date.getMinutes();
+        } else {
+            formattedDate = date.getHours() + ':' + date.getMinutes();
+        }
+        timetracking.stop('new task', taskStatus.TaskStatus.FINISHED, formattedDate);
+        let tasks = config.get('tasks');
+        assert.equal(tasks.length, 1);
+        assert.equal(tasks[0].status, 2)		
+    });
 				
 	after(() => {
 		config.set('tasks', []);
