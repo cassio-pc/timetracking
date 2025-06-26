@@ -27,7 +27,7 @@ describe(`${pkg.name} - ${pkg.description}`, () => {
 		timetracking.start('new task', 'this is a new task', true);
 		let tasks = config.get('tasks');
 		assert.equal(tasks.length, 1);
-		assert.equal(tasks[0].status, 0)
+		assert.equal(tasks[0].status, 2); // TaskStatus.FINISHED
 	});
 	
 	it(':: list all tasks by creation date', () => {
