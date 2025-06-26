@@ -67,7 +67,7 @@ program
 
 program
 	.command('list [date]')
-	.description('Resume time of the taks. You can pass the date on format configured (' + (config && config.all.config ? config.all.config.date_format : 'MM/dd/yyyy') + ').')
+	.description('Resume time of the taks. You can pass the date on format configured (' + (config?.all?.config?.date_format || 'MM/dd/yyyy') + ').')
 	.alias('l')
 	.action((date) => {
 		timetracking.list(date);
@@ -75,7 +75,7 @@ program
 
 program
 	.command('add <task> <time_spent> [date]')
-	.description('Add a task with a specific time spent and on a specific date. You can pass the date on format configured (' + (config && config.all.config ? config.all.config.date_format : 'MM/dd/yyyy') + ').')
+	.description('Add a task with a specific time spent and on a specific date. You can pass the date on format configured (' + (config?.all?.config?.date_format || 'MM/dd/yyyy') + ').')
 	.alias('a')
 	.action((task, timeSpent, date) => {
 		timetracking.add(task, timeSpent, date);
