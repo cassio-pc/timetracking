@@ -173,7 +173,7 @@ export class Timetracking {
 
     private getListDateFormat(): string {
         let dateFormat = 'MM/DD/YYYY';
-        if (this.config && this.config.date_format) {
+        if (this.config?.date_format) {
             dateFormat = this.config.date_format.toUpperCase();
         }
         return dateFormat;
@@ -234,7 +234,7 @@ export class Timetracking {
 
     private getAddDateFormat(): string {
         let dateFormat = 'MM/DD/YYYY h:mm';
-        if (this.config && this.config.date_format) {
+        if (this.config?.date_format) {
             dateFormat = this.config.date_format.toUpperCase() + ' h:mm';
         }
         return dateFormat;
