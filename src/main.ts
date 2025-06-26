@@ -67,7 +67,7 @@ program
 
 program
 	.command('list [date]')
-	.description('Resume time of the taks. You can pass the date on format configured (' + (config?.all?.config?.date_format || 'MM/dd/yyyy') + ').')
+	.description('Resume time of the taks. You can pass the date on format configured (' + ((config && config.all && config.all.config && config.all.config.date_format) ? config.all.config.date_format : 'MM/dd/yyyy') + ').')
 	.alias('l')
 	.action((date) => {
 		timetracking.list(date);
