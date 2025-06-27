@@ -179,7 +179,7 @@ export class Timetracking {
         return dateFormat;
     }
 
-    private getValidListDate(date: string, dateFormat: string): string | null {
+    private getValidDate(date: string, dateFormat: string): string | null {
         let validDate = date;
         if (date === undefined) {
             validDate = moment().format(dateFormat);
@@ -190,6 +190,10 @@ export class Timetracking {
             }
         }
         return validDate;
+    }
+
+    private getValidListDate(date: string, dateFormat: string): string | null {
+        return this.getValidDate(date, dateFormat);
     }
 
     private getTimingsAndTotals(date: string, dateFormat: string) {
@@ -241,16 +245,7 @@ export class Timetracking {
     }
 
     private getValidAddDate(date: string, dateFormat: string): string | null {
-        let validDate = date;
-        if (date === undefined) {
-            validDate = moment().format(dateFormat);
-        } else {
-            if (!moment(date, dateFormat).isValid()) {
-                console.log('Date it is not in a valid format.');
-                return null;
-            }
-        }
-        return validDate;
+        return this.getValidDate(date, dateFormat);
     }
 
     private parseTimeSpent(timeSpent: string): { hour: number | null, min: number | null } {
